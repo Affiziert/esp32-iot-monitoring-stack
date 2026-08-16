@@ -65,6 +65,8 @@ struct __attribute__((packed)) Payload {
   uint16_t battery;
 };
 
+static_assert(sizeof(Payload) == 8,"Payload size must be 8 bytes");
+
 // =================== Runtime Variables ===================
 // Sensor and battery measurements
 int16_t  t_x100;
@@ -95,7 +97,9 @@ static void initEspNow() {
       delay (100);
       Serial.println("ESP-NOW: Initialising failed");
     }
-  delay (60000);
+    while (true) {
+      delay(1000);
+    }
   }
 
   esp_now_peer_info_t peer = {}; // Configure the ESP-NOW peer for unicast communication
@@ -109,7 +113,9 @@ static void initEspNow() {
       delay (100);
       Serial.println("ESP-NOW: Add peer failed");
     }
-  delay (60000);
+    while (true) {
+      delay(1000);
+    };
   }
 }
 
@@ -123,7 +129,9 @@ static void initSht31() {
       delay (100);
       Serial.println("SHT31: Not found");
     }
-  delay (60000);
+    while (true) {
+      delay(1000);
+    };
   }
 }
 
