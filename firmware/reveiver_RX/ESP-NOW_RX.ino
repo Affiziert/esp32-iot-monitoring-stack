@@ -1,29 +1,37 @@
+/*
+ * ESP-NOW RX Node
+ *
+ * ArduinoIDE configuration:
+ * - ESP32 Arduino Core: 3.3.11
+ * - Board: ESP32C3 Dev Module
+ * - CPU Frequency: 80 MHz
+ * - USB CDC On Boot: Enabled
+ * - Serial Baud Rate: 115200
+ */
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_now.h>
 
-// ================ Gerätekonfiguration ================
+// =================== Device Config ===================
+// Protocol version
+static constexpr uint8_t  protocol_version   = 1;   // Must match the transmitter version
 
-// Festlegung des Funkkanals
-static const uint8_t WIFI_CHANNEL = 6;
+// Wi-Fi settings
+static const uint8_t wifi_channel = 6; // Wi-Fi channel
+static constexpr wifi_power_t wifi_power = WIFI_POWER_15dBm; // Transmission power. Some ESP32-C3 boards show an unstable connection above transmission power WIFI_POWER_15dBm.
 
-// Festlegung Sendeleistung - Manche Boards haben bei einer Sendeleistung > WIFI_POWER_15dBm eine unstabile Verbindung
-static constexpr wifi_power_t WIFI_POWER = WIFI_POWER_15dBm;
+// Maximum sensor ID value (because uint8_t range: 0-255)
+static constexpr uint8_t max_sensor_ID = 255; // Reserved for future sensor ID validation
 
-// Festlegung der Protokoll-Version
-static constexpr uint8_t  protocol_version = 1;
+// Enable serial debug output
+// 0 = normal operation
+// 1 = debug mode
+#define DEBUG_SERIAL 0 
 
-// Festlegung der maximalen Anzahl an Sensor-IDs
-static constexpr uint8_t MAX_SENSORS = 256;
-
-// CPU-Takt kann von 160 MHz auf 80 MHz reduziert werden
-
-#define DEBUG_SERIAL 0   // 1 = Debug, 0 = Feldbetrieb
-
-// ================ Gerätekonfiguration-Ende ================
-
-// Erstellung der Payload-Struktur (auf 8 Bytes festgelegt)
-// uint nur für positive Werte, int für negative
+// =================== Payload Definition ===================
+// Data structure transmitted via ESP-NOW
+// Packed to ensure a fixed payload size of 8 bytes
 struct __attribute__((packed)) Payload {
   uint8_t  version;
   uint8_t  sensorId;
@@ -32,24 +40,55 @@ struct __attribute__((packed)) Payload {
   uint16_t battery;
 };
 
-// =======================================================
+static_assert(sizeof(Payload) == 8,"Payload size must be 8 bytes");
+
+// =================== Function Implementations ===================
+// Initialize ESP-NOW Function
+static void initEspNow() {
+  WiFi.mode(WIFI_STA); // Set Wi-Fi settings
+  WiFi.setChannel(wifi_channel);
+  WiFi.setTxPower(wifi_power);
+
+  if (esp_now_init() != ESP_OK) { // Initialize ESP-NOW
+    if (DEBUG_SERIAL == 1){
+      delay (100);
+      Serial.println("ESP-NOW: Initialising failed");
+    }
+    while (true) {
+      delay(1000);
+    }
+  }
+}
+
+// ESP-NOW callback handler
 void onRecv(const esp_now_recv_info_t* info, const uint8_t* data, int len) {
-  // Kontrolle, ob Nachrichtenlänge stimmt
-  if (len != (int)sizeof(Payload)) return;
+  if (len != (int)sizeof(Payload)) {  // Ignore packets with unexpected payload size
+    if (DEBUG_SERIAL == 1){
+     Serial.println("Callback ERROR: Invalid payload size");
+    } 
+    return;
+  }
 
-  // Kopieren der Empfangsdaten in Struct Payload
   Payload p;
-  memcpy(&p, data, sizeof(p));
+  memcpy(&p, data, sizeof(p)); // Copy received bytes into payload structure
 
-  // Versionsprüfung (muss an Sender angepasst werden)
-  if (p.version != protocol_version) return;
+  if (p.version != protocol_version) {  // Ignore packets with unsupported protocol version
+    if (DEBUG_SERIAL == 1) {
+     Serial.println("Callback ERROR: Protocol version mismatch");
+    }
+    return;
+  }
 
-  // ID-Prüfung (ID 0 ist ungültig)
-  if (p.sensorId == 0) return; 
+  if (p.sensorId == 0) {  // Ignore packets with invalid sensor ID
+   if (DEBUG_SERIAL == 1) {
+      Serial.println("Callback ERROR: Invalid sensor ID");
+    }
+    return;
+  }
 
-  // Pointer auf MAC-Adresse des Senders und Payload ausgebe als JSON
-  const uint8_t* mac = info->src_addr;
-  Serial.printf(
+  const uint8_t* mac = info->src_addr; // Get transmitter MAC address
+
+  Serial.printf( // Output received data as JSON for serial processing
   "{\"id\":%u,"
   "\"mac\":\"%02X:%02X:%02X:%02X:%02X:%02X\","
   "\"temp\":%.2f,\"rh\":%.2f,\"batt\":%u}\n",
@@ -62,31 +101,18 @@ void onRecv(const esp_now_recv_info_t* info, const uint8_t* data, int len) {
 }
 
 void setup() {
-  // Beginn der seriellen Ausgabe und warten, bis diese aufgebaut ist
-  Serial.begin(115200);
+  Serial.begin(115200); // Initialize serial interface
   while (!Serial) {}
 
-  // Einstellung des WiFi-Modus, -Funkkanals und Sendeleistung
-  WiFi.mode(WIFI_STA);
-  WiFi.setChannel(WIFI_CHANNEL);
-  WiFi.setTxPower(WIFI_POWER);
-
-  // Initialisierung ESP-Now
-  if (esp_now_init() != ESP_OK) {
-    delay (200);
-    Serial.println("RX: ESP-NOW RX initialising failed");
-    delay (200);
-    ESP.restart();
+  initEspNow();  // Initialize ESP-NOW
+  esp_now_register_recv_cb(onRecv); // Register ESP-NOW transmission callback
+  delay (100);
+  
+  // Initialization completed successfully
+  if (DEBUG_SERIAL == 1){
+    Serial.println("ESP-NOW RX Node initialized successfully.");
+    delay (100);
   }
-
-  // Callback registrieren (Eventbasiert)
-  esp_now_register_recv_cb(onRecv);
-
-  // Initialisierung erfolgreich
-  delay (200);
-  Serial.println("ESP-NOW RX ready");
-
 }
 
 void loop() {}
-
