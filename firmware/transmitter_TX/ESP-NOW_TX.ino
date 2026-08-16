@@ -93,7 +93,7 @@ static void initEspNow() {
   if (esp_now_init() != ESP_OK) { // Initialize ESP-NOW
     if (DEBUG_SERIAL == 1){
       delay (100);
-      Serial.println("ESP-NOW: TX initialising failed");
+      Serial.println("ESP-NOW: Initialising failed");
     }
   delay (60000);
   }
@@ -107,7 +107,7 @@ static void initEspNow() {
   if (esp_now_add_peer(&peer) != ESP_OK) {
     if (DEBUG_SERIAL == 1){
       delay (100);
-      Serial.println("ESP-NOW: TX add peer failed");
+      Serial.println("ESP-NOW: Add peer failed");
     }
   delay (60000);
   }
@@ -121,7 +121,7 @@ static void initSht31() {
   if (!sht31.begin(SHT31_addr)) { // Initialize sensor
     if (DEBUG_SERIAL == 1){
       delay (100);
-      Serial.println("SHT31: not found");
+      Serial.println("SHT31: Not found");
     }
   delay (60000);
   }
