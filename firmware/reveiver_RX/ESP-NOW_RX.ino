@@ -14,6 +14,9 @@
 #include <esp_now.h>
 
 // =================== Device Config ===================
+// Firmware version
+static constexpr char firmware_version[] = "1.0.0";
+
 // Protocol version
 static constexpr uint8_t  protocol_version   = 1;   // Must match the transmitter version
 
@@ -111,6 +114,12 @@ void setup() {
   // Initialization completed successfully
   if (DEBUG_SERIAL == 1){
     Serial.println("ESP-NOW RX Node initialized successfully.");
+    Serial.print("Firmware version: ");
+    Serial.println(firmware_version);
+
+    Serial.print("Protocol version: ");
+    Serial.println(protocol_version);
+
     delay (100);
   }
 }

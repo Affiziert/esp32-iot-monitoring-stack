@@ -19,6 +19,9 @@
 #include <Adafruit_SHT31.h>
 
 // =================== Device Config ===================
+// Firmware version
+static constexpr char firmware_version[] = "1.0.0";
+
 // Sensor ID and protocol version
 static constexpr uint8_t  sensor_ID          = 1;   // Make unique for each ESP device (0–255)
 static constexpr uint8_t  protocol_version   = 1;   // Must match the receiver version
@@ -229,6 +232,15 @@ void setup() {
   // Initialization completed successfully
   if (DEBUG_SERIAL == 1){
     Serial.println("ESP-NOW TX Node initialized successfully.");
+    Serial.print("Firmware version: ");
+    Serial.println(firmware_version);
+
+    Serial.print("Protocol version: ");
+    Serial.println(protocol_version);
+
+    Serial.print("Sensor ID: ");
+    Serial.println(sensor_ID);
+
     delay (100);
   }
 
