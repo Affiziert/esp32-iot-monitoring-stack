@@ -1,6 +1,6 @@
 # ESP32 IoT Monitoring Stack
 
-The project uses battery-powered ESP32-C3 boards as transimitters to acquire temperature, relative humidity and battery voltage. The sensor data is transmitted wirelessly via ESP-NOW to an ESP32-C3 receiver and forwarded via USB serial to a Raspberry Pi. A Python-based data bridge processes the received data and stores it in an InfluxDB database.
+The project uses battery-powered ESP32-C3 boards as transmitters to measure temperature, relative humidity, and battery voltage. The sensor data is transmitted wirelessly via ESP-NOW to an ESP32-C3 receiver and forwarded via USB serial to a Raspberry Pi. A Python-based data bridge processes the received data and stores it in an InfluxDB database.
 
 ## Overview
 
@@ -8,7 +8,7 @@ The goal of this project is to implement a lightweight and modular IoT monitorin
 The current implementation consists of the following components:
 
 - ESP32-C3 transmitter node with a single Li-Ion cell, TP4056 charging module and voltage divider for battery voltage measurement
-- SHT31 breakout board for temperature and relative humidity measurement
+- SHT31 module for temperature and relative humidity measurement
 - ESP32-C3 receiver node
 - ESP-NOW wireless communication
 - Raspberry Pi 4 as an edge gateway
@@ -88,15 +88,13 @@ Its main tasks are:
 ### InfluxDB
 
 InfluxDB is used as the time-series database for storing the sensor measurements.
-The database can be deployed using Docker Compose.
+The database is deployed using Docker Compose.
 
 ## Software Requirements
 
 ### ESP32 Firmware
 
-- Arduino IDE
-- ESP32 Arduino Core 3.3.11
-- ESP32-C3 Dev Module
+- Arduino IDE with ESP32 Arduino Core 3.3.11
 - Adafruit SHT31 library
 
 ### Raspberry Pi
@@ -104,7 +102,6 @@ The database can be deployed using Docker Compose.
 - Python 3.x
 - pyserial
 - influxdb-client
-- Docker
 - Docker Compose
 
 ### Database
@@ -126,33 +123,26 @@ The ESP-NOW communication uses a fixed-size binary payload of 8 bytes.
 Temperature and relative humidity are transmitted as scaled integer values to reduce the payload size and avoid transmitting floating-point values.
 The payload structure is explicitly packed and its size is checked at compile time.
 
-## Serial Data Format
-
-The ESP32 receiver forwards valid measurements as JSON via the USB serial interface.
-The serial interface currently operates at:
-
-```text
-115200 baud
-```
-
 ---
 
 ## Configuration
 
 Several parameters can be configured directly in the firmware and data bridge.
 
-### ESP32
+### ESP32-C3 TX and RX
 
-Examples include:
-
-- Sensor ID
+You can configure:
 - Firmware version
 - Protocol version
 - ESP-NOW Wi-Fi channel
 - ESP-NOW transmission power
-- Sensor configuration
+- Sensor ID
+- Receiver MAC address
 - Deep sleep interval
 - Number of transmissions per cycle
+- I2C pins and address for the sensor
+- ADC pin for battery voltage
+- Number of voltage measurements per transmission cycle (to calculate the average)
 
 ### Data Bridge
 
@@ -164,6 +154,18 @@ TOKEN  = "YOUR_INFLUXDB_TOKEN"
 ORG    = "YOUR_INFLUXDB_ORGANIZATION"
 BUCKET = "YOUR_INFLUXDB_BUCKET"
 ```
+
+## Deployment
+
+The system is intended to run with the ESP32 receiver connected to a Raspberry Pi via USB.
+
+The Raspberry Pi runs:
+
+- The Python data bridge
+- The data bridge as a systemd service
+- InfluxDB in a Docker container
+
+Detailed setup instructions will be added to the `documentation/` directory.
 
 ## Versioning
 
@@ -194,6 +196,15 @@ Normal operation:
 #define DEBUG_SERIAL 0
 ```
 
+## Serial Data Format
+
+The ESP32 receiver forwards valid measurements as JSON via the USB serial interface.
+The serial interface currently operates at:
+
+```text
+115200 baud
+```
+
 The debug output can be used to identify issues such as:
 
 - ESP-NOW initialization failures
@@ -202,35 +213,7 @@ The debug output can be used to identify issues such as:
 - Invalid sensor IDs
 - ESP-NOW transmission failures
 - Sensor initialization failures
-- Firmware and protocol versions
-
-## InfluxDB Data Model
-
-The current implementation stores sensor data in InfluxDB using the following structure:
-
-| Name | Type | Description | Unit |
-|------|------|-------------|------|
-| `MAC` | Tag | MAC address of the transmitter | – |
-| `ID` | Field | Sensor ID | – |
-| `Temperature` | Field | Temperature | °C |
-| `Relative_Humidity` | Field | Relative humidity | % |
-| `Battery` | Field | Battery voltage | mV |
-
-The exact InfluxDB configuration is defined in the Docker Compose setup.
-
----
-
-## Deployment
-
-The system is intended to run with the ESP32 receiver connected to a Raspberry Pi via USB.
-
-The Raspberry Pi runs:
-
-- The Python data bridge
-- The data bridge as a systemd service
-- InfluxDB in a Docker container
-
-Detailed setup instructions will be added to the `documentation/` directory.
+- Firmware and protocol version information
 
 ---
 
