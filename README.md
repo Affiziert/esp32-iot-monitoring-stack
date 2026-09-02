@@ -34,7 +34,7 @@ The modular architecture allows individual components to be modified or extended
 | Component | Quantity | Purpose |
 |-----------|----------|---------|
 | ESP32-C3 | 1 | Transmitter |
-| SHT31 | 1 | Temperature and relative humidity measurement |
+| SHT31 module | 1 | Temperature and relative humidity measurement |
 | Li-Ion cell | 1 | Power supply |
 | TP4056 module | 1 | Li-Ion charging |
 | Resistors | 2 | Voltage divider for battery voltage measurement |
@@ -123,7 +123,8 @@ It periodically wakes from deep sleep, measures the connected sensors, transmits
 ### ESP32 Receiver Node
 
 The receiver node continuously listens for ESP-NOW packets and converts the received data into a JSON object for transmission via USB serial.
-The transmitter's MAC address is obtained from the ESP-NOW reception information.
+The MAC address of the transmitter is obtained from the ESP-NOW reception information.
+
 The JSON object contains:
 
 - Sensor ID
@@ -221,6 +222,7 @@ A protocol version change is required if the structure or interpretation of the 
 - [ ] InfluxDB Docker Compose setup
 - [ ] Raspberry Pi setup documentation
 - [ ] 3D Printing Cases for Transmitter/Receiver
+- [ ] Protocol Version 2 for the integration of generic sensors 
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
 ---
