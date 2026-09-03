@@ -82,37 +82,15 @@ The modular architecture allows individual components to be modified or extended
 
 ## Setup
 
-Several parameters can be configured directly in the firmware and data bridge.
+The setup consists of preparing and programming the ESP32-C3 nodes, assembling the sensor hardware, configuring the Raspberry Pi, and deploying the InfluxDB database and data bridge. It is assumed that the Arduino IDE and the required libraries are already installed and that the corresponding ESP32 boards have been added to the Board Manager.
 
-### ESP32-C3 TX and RX
+### ESP32 Receiver
 
-Hardware - Schaltplan/Widerstandswerte/Kondensatorwerte
+The receiver must be configured and flashed before setting up the transmitter, as the transmitter requires the receiver's MAC address. If you do not know how to determine the MAC address, you can simply flash `ESP_MAC_Identifier.ino` to the receiver node. The MAC address will then be displayed via the serial monitor.
 
-You can configure:
-- Firmware version
-- Protocol version
-- ESP-NOW Wi-Fi channel
-- ESP-NOW transmission power
-- Sensor ID
-- Receiver MAC address
-- Deep sleep interval
-- Number of transmissions per cycle
-- I2C pins and address for the sensor
-- ADC pin for battery voltage
-- Number of voltage measurements per transmission cycle (to calculate the average)
-
-### Data Bridge
-
-The following InfluxDB connection parameters must be configured before use:
-
-```python
-URL    = "http://localhost:8086"
-TOKEN  = "YOUR_INFLUXDB_TOKEN"
-ORG    = "YOUR_INFLUXDB_ORGANIZATION"
-BUCKET = "YOUR_INFLUXDB_BUCKET"
-```
-
----
+1. Download the `ESP-NOW_RX.ino` file and open it with the Arduino IDE.
+2. Configure `wifi_channel` and `wifi_power` for a consistent Wi-Fi connection.
+3. Flash the firmware to the ESP-C3 receiver.
 
 ## Components
 
@@ -224,6 +202,7 @@ A protocol version change is required if the structure or interpretation of the 
 - [ ] Raspberry Pi setup documentation
 - [ ] Protocol Version 2 for the integration of generic sensors
 - [ ] Grafana Dashboard
+- [ ] ID verification 
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
 ---
