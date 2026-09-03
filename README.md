@@ -9,7 +9,7 @@ The project uses battery-powered ESP32-C3 boards as transmitters to measure temp
 The goal of this project is to implement a lightweight and modular IoT monitoring stack using readily available hardware and open-source software.
 The current implementation consists of the following components:
 
-- ESP32-C3 transmitter node with a single Li-Ion cell, TP4056 charging module and voltage divider for battery voltage measurement
+- ESP32-C3 transmitter node with a single Li-Ion cell (3.7 V), TP4056 charging module and voltage divider for battery voltage measurement
 - SHT31 module for temperature and relative humidity measurement
 - ESP32-C3 receiver node
 - ESP-NOW wireless communication
@@ -35,7 +35,8 @@ The modular architecture allows individual components to be modified or extended
 |-----------|----------|---------|
 | ESP32-C3 | 1 | Transmitter |
 | SHT31 module | 1 | Temperature and relative humidity measurement |
-| Li-Ion cell | 1 | Power supply |
+| Li-Ion cell (3.7 V)| 1 | Power supply |
+| 18650 battery holder  | 1 | Battery connection |
 | TP4056 module | 1 | Li-Ion charging |
 | Resistors | 2 | Voltage divider for battery voltage measurement |
 | Capacitors | 1 | ADC input filtering |
@@ -51,7 +52,7 @@ The modular architecture allows individual components to be modified or extended
 
 | Component | Quantity | Purpose |
 |-----------|----------|---------|
-| Raspberry Pi 3 B+/4/5| 1 | Edge gateway |
+| Raspberry Pi 4 | 1 | Edge gateway |
 | microSD card | 1 | Raspberry Pi OS and data |
 | SSD (optional) | 1 | Additional storage / Docker data |
 | USB cable (optional) | 1 | Connection to SSD |
@@ -72,7 +73,7 @@ The modular architecture allows individual components to be modified or extended
 - pyserial
 - influxdb-client
 - Docker Compose
-
+  
 ### Database
 
 - InfluxDB 2.x
@@ -117,7 +118,7 @@ BUCKET = "YOUR_INFLUXDB_BUCKET"
 
 ### ESP32 Transmitter Node
 
-The transmitter node collects environmental data and transmits a fixed-size payload of 8 byte via ESP-NOW.
+The transmitter node collects environmental data and transmits a fixed-size payload of 8 bytes via ESP-NOW.
 It periodically wakes from deep sleep, measures the connected sensors, transmits the data and returns to deep sleep.
 
 ### ESP32 Receiver Node
@@ -152,7 +153,7 @@ The database is deployed using Docker Compose.
 
 ## Communication Protocol
 
-My ESP-NOW communication uses a fixed-size binary payload of 8 bytes.
+The ESP-NOW communication uses a fixed-size binary payload of 8 bytes.
 
 | Byte | Data Type | Description |
 |------|-----------|-------------|
@@ -179,8 +180,8 @@ The debug output can be used to identify issues such as:
 - Invalid sensor IDs
 - ESP-NOW transmission failures
 - Sensor initialization failures
-
-Firmware and protocol version information
+- Firmware and protocol version information
+  
 Debug output can be enabled using:
 
 ```cpp
@@ -221,8 +222,8 @@ A protocol version change is required if the structure or interpretation of the 
 - [ ] Hardware wiring diagram
 - [ ] InfluxDB Docker Compose setup
 - [ ] Raspberry Pi setup documentation
-- [ ] 3D Printing Cases for Transmitter/Receiver
-- [ ] Protocol Version 2 for the integration of generic sensors 
+- [ ] Protocol Version 2 for the integration of generic sensors
+- [ ] Grafana Dashboard
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
 ---
