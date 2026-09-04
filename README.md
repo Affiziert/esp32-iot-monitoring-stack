@@ -2,6 +2,8 @@
 
 The project uses battery-powered ESP32-C3 boards as transmitters to measure temperature, relative humidity, and battery voltage. The sensor data is transmitted wirelessly via ESP-NOW to an ESP32-C3 receiver and forwarded via USB serial to a Raspberry Pi. A Python-based data bridge processes the received data and stores it in an InfluxDB database running in a Docker Compose environment.
 
+This project can be used as a reference for integrating additional sensors and actuators.
+
 ---
 
 ## Overview
@@ -23,7 +25,7 @@ The modular architecture allows individual components to be modified or extended
 
 ## Architecture
 
-<img src="diagrams/ESP31_IoT_Monitoring_Stack_Architecture.png" width="100%">
+<img src="diagrams/ESP32_IoT_Monitoring_Stack_Architecture.png" width="100%">
 
 ---
 
@@ -35,11 +37,11 @@ The modular architecture allows individual components to be modified or extended
 |-----------|----------|---------|
 | ESP32-C3 | 1 | Transmitter |
 | SHT31 module | 1 | Temperature and relative humidity measurement |
-| Li-Ion cell (3.7 V)| 1 | Power supply |
+| Li-Ion cell (3.7 V) | 1 | Power supply |
 | 18650 battery holder  | 1 | Battery connection |
 | TP4056 module | 1 | Li-Ion charging |
-| Resistors | 2 | Voltage divider for battery voltage measurement |
-| Capacitors | 1 | ADC input filtering |
+| Resistors | 2 | Voltage divider for battery voltage measurement (1 MΩ) |
+| Capacitors | 1 | ADC input filtering (100 nF) |
 
 ### Receiver Node
 
@@ -56,6 +58,7 @@ The modular architecture allows individual components to be modified or extended
 | microSD card | 1 | Raspberry Pi OS and data |
 | SSD (optional) | 1 | Additional storage / Docker data |
 | USB cable (optional) | 1 | Connection to SSD |
+
 ---
 
 ## Software Requirements
@@ -96,23 +99,24 @@ It is assumed that the following prerequisites are already fulfilled:
 The receiver must be configured and flashed before setting up the transmitter, as the transmitter requires the receiver's MAC address. If you do not know how to determine the MAC address, you can simply flash `ESP_MAC_Identifier.ino` to the receiver node. The MAC address will then be displayed via the serial monitor.
 
 1. Download the `ESP-NOW_RX.ino` file and open it with the Arduino IDE.
-2. Configure `wifi_channel` and `wifi_power` for a consistent Wi-Fi connection.
-3. Flash the firmware to the ESP-C3 receiver.
+2. Configure `wifi_channel` and `wifi_power`. Some boards may experience connection problems with transmission power above 15 dBm.
+3. Flash the firmware to the ESP32-C3 receiver.
 
 ### ESP32 Transmitter
 
 1. Download the `ESP-NOW_TX.ino` file and open it with the Arduino IDE.
-2. Configure `wifi_channel`  to match the receiver's channel and `wifi_power` for a consistent Wi-Fi connection.
+2. Configure `wifi_channel` to match the receiver's channel and `wifi_power`.
 3. Set `receiverMac[]` to match the MAC address of the receiver.
 4. If you use more than one sensor node, assign a unique `sensor_ID` to each node.
 5. Set the desired deep sleep interval (`sleep_time_sec`), number of transmissions per cycle (`trans_per_cycle`) and number of voltage measurements per cycle (`vol_meas_per_cycle`).
 6. If you assemble the sensor node according to the example hardware setup, no further configuration is required. Otherwise, configure the I²C and ADC pins according to your hardware setup.
+7. Flash the firmware to the ESP32-C3 transmitter.
 
 ### Hardware Setup
 
 The sensor node can be assembled according to the following wiring diagram.
 
-For the battery voltage measurement, I used:
+For the battery voltage measurement, the following components are used::
 - Voltage divider: **2 × 1 MΩ** (680 kΩ resistors are also suitable)
 - ADC filter capacitor: **1 × 100 nF**
 
@@ -120,13 +124,39 @@ For the battery voltage measurement, I used:
 
 ### Raspberry Pi
 
-1. Copy the `data_bridge.py` and `docker-compose.yml` to your Raspberry Pi
-2. Start the Docker Compose stack with: `docker compose up -d` <br>
-  InfluxDB configuration and database data are stored in the influxdb directory next to the docker-compose.yml file. For long-term operation, it is recommended to store the InfluxDB data on an external SSD. Frequent database write operations wear out the SD card of the Raspberry Pi more quickly. The InfluxDB container is configured to restart automatically unless it is manually stopped.
+1. Copy the `data_bridge.py` and `docker-compose.yml` to your Raspberry Pi.
+2. Start the Docker Compose stack with:
+   ```bash
+   docker compose up -d
+   ```
+   The InfluxDB configuration and database data are stored in the `influxdb` directory next to the `docker-compose.yml` file. For long-term operation, it is recommended to store the InfluxDB data on an external SSD. Frequent database write operations wear out the SD card of the Raspberry Pi more quickly. The InfluxDB container is configured to restart automatically unless it is manually stopped.
 3. Access the InfluxDB web interface on the Raspberry Pi (`http://localhost:8086`) or any device in your network (`http://<Raspberry_Pi_IP>:8086`) and configure InfluxDB for the first time. <br>
 You will need the InfluxDB URL, organization, bucket, and API token to configure the `data_bridge.py`.
-4. Next step...
+4. Now configure the `data_bridge.py` by adding the InfluxDB organization, bucket and API token created during the initial InfluxDB setup.
+5. Set the baud rate to match the value used in the firmware and configure the serial port to which the ESP32-C3 receiver is connected. You can identify the available serial devices by running the following command and looking for the identifier of the receiver:
+   ```bash
+   ls -l /dev/serial/by-id/
+   ```
+6. Navigate to the directory containing `data_bridge.py` and start the program with:
+   ```bash
+   python3 data_bridge.py
+   ```
+7. Verify the received data by logging in to the InfluxDB web interface and checking the configured bucket in the Data Explorer for new data points.
 
+### Automatic Startup (optional but recommended)
+1. Copy the `data_bridge.service` file to the `/etc/systemd/system/` directory on the Raspberry Pi.
+2. Open the service file and change the username and project directory according to your setup.
+3. Enable and start the service with:
+   ```bash
+   sudo systemctl enable --now data_bridge.service
+   ```
+4. The Docker Compose stack is configured to restart automatically using the `restart: unless-stopped` option.
+5. After rebooting the Raspberry Pi, the Docker Compose stack and the data bridge should start automatically. You can check the status of the data bridge with:
+   ```bash
+   sudo systemctl status data_bridge.service
+   ```
+   You are now ready to go!
+   
 ---
    
 ## Components
@@ -233,14 +263,10 @@ A protocol version change is required if the structure or interpretation of the 
 
 ### Planned
 
-- [ ] Setup documentation
-- [ ] Hardware wiring diagram
-- [ ] InfluxDB Docker Compose setup
-- [ ] Raspberry Pi setup documentation
-- [ ] Protocol Version 2 for the integration of generic sensors
-- [ ] Grafana Dashboard
+- [ ] Sensor Node ID verification
 - [ ] Receiver logic for multiple transmissions per cycle
-- [ ] Sensor Node ID verification 
+- [ ] Grafana Dashboard
+- [ ] Protocol Version 2 for generic sensor integration
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
 ---
