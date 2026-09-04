@@ -34,7 +34,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 APP_VERSION = "1.0.0"
 
 # Serial connection to the ESP-NOW receiver
-SERIAL_PORT = "/dev/ttyACM0" # Adjust to your port
+SERIAL_PORT = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_XX:XX:XX:XX:XX:XX-if00" # Adjust to your port
 BAUDRATE    = 115200
 
 # InfluxDB connection settings
