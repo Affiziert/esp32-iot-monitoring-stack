@@ -1,0 +1,10 @@
+[Unit]
+Description=ESP-NOW Data Bridge to InfluxDB
+
+[Service]
+User=<USERNAME>
+ExecStart=/usr/bin/python3 /home/<USERNAME>/<PROJECT-DIRECTORY>/data_bridge.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
