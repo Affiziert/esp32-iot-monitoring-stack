@@ -121,7 +121,11 @@ For the battery voltage measurement, I used:
 ### Raspberry Pi
 
 1. Copy the `data_bridge.py` and `docker-compose.yml` to your Raspberry Pi
-2. 
+2. Start the Docker Compose stack with: `docker compose up -d` <br>
+  InfluxDB configuration and database data are stored in the influxdb directory next to the docker-compose.yml file. For long-term operation, it is recommended to store the InfluxDB data on an external SSD. Frequent database write operations wear out the SD card of the Raspberry Pi more quickly. The InfluxDB container is configured to restart automatically unless it is manually stopped.
+3. Access the InfluxDB web interface on the Raspberry Pi (`http://localhost:8086`) or any device in your network (`http://<Raspberry_Pi_IP>:8086`) and configure InfluxDB for the first time. <br>
+You will need the InfluxDB URL, organization, bucket, and API token to configure the `data_bridge.py`.
+4. Next step...
 
 ---
    
