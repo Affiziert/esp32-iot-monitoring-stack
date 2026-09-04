@@ -1,0 +1,14 @@
+name: InfluxDB_2
+
+services:
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb_2
+    ports:
+      - "8086:8086"
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/config:/etc/influxdb2
+    restart: unless-stopped
+
+
