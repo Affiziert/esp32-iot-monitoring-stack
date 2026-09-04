@@ -23,7 +23,7 @@ The modular architecture allows individual components to be modified or extended
 
 ## Architecture
 
-<img width="2739" height="769" alt="ESP31_IoT_Monitoring_Stack_Architecture" src="https://github.com/user-attachments/assets/02fb3d43-3915-4a11-8638-959cc0b40d00" />
+<img src="diagrams/ESP31_IoT_Monitoring_Stack_Architecture.png" width="100%">
 
 ---
 
@@ -82,7 +82,14 @@ The modular architecture allows individual components to be modified or extended
 
 ## Setup
 
-The setup consists of preparing and programming the ESP32-C3 nodes, assembling the sensor hardware, configuring the Raspberry Pi, and deploying the InfluxDB database and data bridge. It is assumed that the Arduino IDE and the required libraries are already installed and that the corresponding ESP32 boards have been added to the Board Manager.
+The setup consists of preparing and programming the ESP32-C3 nodes, assembling the sensor hardware, configuring the Raspberry Pi, and deploying the InfluxDB database and data bridge.
+
+It is assumed that the following prerequisites are already fulfilled:
+
+- Arduino IDE is installed and configured.
+- The required ESP32 board support and libraries are installed.
+- Raspberry Pi OS and Python 3, including the required libraries, are installed on the Raspberry Pi.
+- Docker and Docker Compose are installed on the Raspberry Pi.
 
 ### ESP32 Receiver
 
@@ -92,6 +99,32 @@ The receiver must be configured and flashed before setting up the transmitter, a
 2. Configure `wifi_channel` and `wifi_power` for a consistent Wi-Fi connection.
 3. Flash the firmware to the ESP-C3 receiver.
 
+### ESP32 Transmitter
+
+1. Download the `ESP-NOW_TX.ino` file and open it with the Arduino IDE.
+2. Configure `wifi_channel`  to match the receiver's channel and `wifi_power` for a consistent Wi-Fi connection.
+3. Set `receiverMac[]` to match the MAC address of the receiver.
+4. If you use more than one sensor node, assign a unique `sensor_ID` to each node.
+5. Set the desired deep sleep interval (`sleep_time_sec`), number of transmissions per cycle (`trans_per_cycle`) and number of voltage measurements per cycle (`vol_meas_per_cycle`).
+6. If you assemble the sensor node according to the example hardware setup, no further configuration is required. Otherwise, configure the I²C and ADC pins according to your hardware setup.
+
+### Hardware Setup
+
+The sensor node can be assembled according to the following wiring diagram.
+
+For the battery voltage measurement, I used:
+- Voltage divider: **2 × 1 MΩ** (680 kΩ resistors are also suitable)
+- ADC filter capacitor: **1 × 100 nF**
+
+<img src="diagrams/Sensor_Node_Schematic.png" width="70%">
+
+### Raspberry Pi
+
+1. Copy the `data_bridge.py` and `docker-compose.yml` to your Raspberry Pi
+2. 
+
+---
+   
 ## Components
 
 ### ESP32 Transmitter Node
@@ -202,7 +235,8 @@ A protocol version change is required if the structure or interpretation of the 
 - [ ] Raspberry Pi setup documentation
 - [ ] Protocol Version 2 for the integration of generic sensors
 - [ ] Grafana Dashboard
-- [ ] ID verification 
+- [ ] Receiver logic for multiple transmissions per cycle
+- [ ] Sensor Node ID verification 
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
 ---
