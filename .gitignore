@@ -1,5 +1,3 @@
-# =================== Python ===================
-
 # Python bytecode
 __pycache__/
 *.py[cod]
@@ -9,15 +7,11 @@ __pycache__/
 venv/
 env/
 
-# =================== IDE ===================
-
 # VS Code
 .vscode/
 
 # JetBrains IDEs
 .idea/
-
-# =================== Operating System ===================
 
 # Windows
 Thumbs.db
@@ -29,8 +23,8 @@ Desktop.ini
 # macOS
 .DS_Store
 
-# =================== Secrets ===================
-
 # Environment files
 .env
 .env.*
+
+/data_bridge/data_bridge_test.service
