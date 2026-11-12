@@ -27,4 +27,5 @@ Desktop.ini
 .env
 .env.*
 
-/data_bridge/data_bridge_test.service
+# Allow example configuration
+!.env.example

@@ -23,25 +23,32 @@ Requirements:
 import json
 import logging
 import time
+import os
 
 import serial
 from serial import SerialException
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from repository root
+ROOT_DIR = Path(__file__).resolve().parent
+load_dotenv(ROOT_DIR / ".env")
 
 # =================== Configuration ===================
 # Application version
 APP_VERSION = "1.0.0"
 
 # Serial connection to the ESP-NOW receiver
-SERIAL_PORT = "/dev/serial/by-id/usb-Espressif_USB_JTAG_serial_debug_unit_XX:XX:XX:XX:XX:XX-if00" # Adjust to your port
-BAUDRATE    = 115200
+SERIAL_PORT = os.getenv("SERIAL_PORT")
+BAUDRATE = int(os.getenv("BAUDRATE", "115200"))
 
 # InfluxDB connection settings
-URL    = "http://localhost:8086"
-TOKEN  = "YOUR_INFLUXDB_TOKEN"
-ORG    = "YOUR_INFLUXDB_ORGANIZATION"
-BUCKET = "YOUR_INFLUXDB_BUCKET"
+URL    = os.getenv("INFLUXDB_URL")
+TOKEN  = os.getenv("INFLUXDB_TOKEN")
+ORG    = os.getenv("INFLUXDB_ORG")
+BUCKET = os.getenv("INFLUXDB_BUCKET")
 
 # =================== Runtime Configuration ===================
 # Required JSON fields expected from the ESP receiver
