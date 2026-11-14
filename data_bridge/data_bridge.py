@@ -12,12 +12,6 @@ Expected JSON format:
     "rh": 52.78,
     "batt": 4014
 }
-
-Requirements:
-- Python 3.x
-- pyserial
-- influxdb-client
-- InfluxDB 2.x
 """
 
 import json
@@ -32,13 +26,14 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from repository root
-ROOT_DIR = Path(__file__).resolve().parent
-load_dotenv(ROOT_DIR / ".env")
+# =================== Software Information ===================
+# Application version
+APP_VERSION = "1.1.0"
 
 # =================== Configuration ===================
-# Application version
-APP_VERSION = "1.0.0"
+# Load config file
+CONFIG_FILE = Path(__file__).resolve().with_name("config.env") 
+load_dotenv(CONFIG_FILE) 
 
 # Serial connection to the ESP-NOW receiver
 SERIAL_PORT = os.getenv("SERIAL_PORT")

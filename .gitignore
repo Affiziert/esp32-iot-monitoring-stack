@@ -27,8 +27,8 @@ Desktop.ini
 .env
 .env.*
 
-# Allow example configuration
-!.env.example
+# Local configuration files
+**/config_local.env
 
 # Local microcontroller configuration
 **/config_local.h
