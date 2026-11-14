@@ -5,7 +5,6 @@ The project uses battery-powered ESP32-C3 boards as transmitters to measure temp
 This project can be used as a reference for integrating additional sensors and actuators.
 
 ---
-
 ## Overview
 
 The goal of this project is to implement a lightweight and modular IoT monitoring stack using readily available hardware and open-source software.
