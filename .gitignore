@@ -29,3 +29,6 @@ Desktop.ini
 
 # Allow example configuration
 !.env.example
+
+# Local microcontroller configuration
+**/config_local.h
