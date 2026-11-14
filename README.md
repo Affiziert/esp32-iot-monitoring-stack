@@ -66,15 +66,13 @@ The modular architecture allows individual components to be modified or extended
 ### ESP32 Firmware
 
 - Arduino IDE
-- ESP32 Arduino Core 3.3.11
+- ESP32 Arduino Core 3.3.12
 - Adafruit SHT31 library
 
 ### Raspberry Pi
 
 - Raspberry Pi OS
 - Python 3.x
-- pyserial
-- influxdb-client
 - Docker Compose
   
 ### Database
@@ -98,16 +96,16 @@ It is assumed that the following prerequisites are already fulfilled:
 
 The receiver must be configured and flashed before setting up the transmitter, as the transmitter requires the receiver's MAC address. If you do not know how to determine the MAC address, you can simply flash `ESP_MAC_Identifier.ino` to the receiver node. The MAC address will then be displayed via the serial monitor.
 
-1. Download the `ESP-NOW_RX.ino` file and open it with the Arduino IDE.
-2. Configure `wifi_channel` and `wifi_power`. Some boards may experience connection problems with transmission power above 15 dBm.
+1. Download the `ESP-NOW_RX.ino` and `config.h`file and open it with the Arduino IDE.
+2. Configure `wifi_channel` and `wifi_power` in the `config.h` file. Some boards may experience connection problems with transmission power above 15 dBm.
 3. Flash the firmware to the ESP32-C3 receiver.
 
 ### ESP32 Transmitter
 
-1. Download the `ESP-NOW_TX.ino` file and open it with the Arduino IDE.
-2. Configure `wifi_channel` to match the receiver's channel and `wifi_power`.
-3. Set `receiverMac[]` to match the MAC address of the receiver.
-4. If you use more than one sensor node, assign a unique `sensor_ID` to each node.
+1. Download the `ESP-NOW_TX.ino` and `config.h` file and open it with the Arduino IDE.
+2. Set `receiverMac[]` in the `config.h` file to match the MAC address of the receiver.
+3. If you use more than one sensor node, assign a unique `sensor_ID` to each node.
+4. Configure `wifi_channel` to match the receiver's channel and `wifi_power`.
 5. Set the desired deep sleep interval (`sleep_time_sec`), number of transmissions per cycle (`trans_per_cycle`) and number of voltage measurements per cycle (`vol_meas_per_cycle`).
 6. If you assemble the sensor node according to the example hardware setup, no further configuration is required. Otherwise, configure the I²C and ADC pins according to your hardware setup.
 7. Flash the firmware to the ESP32-C3 transmitter.
@@ -124,24 +122,54 @@ For the battery voltage measurement, the following components are used::
 
 ### Raspberry Pi
 
-1. Copy the `data_bridge.py` and `docker-compose.yml` to your Raspberry Pi.
+1. Download or copy the `config.env`, `data_bridge.py`,`requirements.txt` and `docker-compose.yml` into the same folder on your Raspberry Pi.
 2. Start the Docker Compose stack with:
    ```bash
    docker compose up -d
    ```
-   The InfluxDB configuration and database data are stored in the `influxdb` directory next to the `docker-compose.yml` file. For long-term operation, it is recommended to store the InfluxDB data on an external SSD. Frequent database write operations wear out the SD card of the Raspberry Pi more quickly. The InfluxDB container is configured to restart automatically unless it is manually stopped.
-3. Access the InfluxDB web interface on the Raspberry Pi (`http://localhost:8086`) or any device in your network (`http://<Raspberry_Pi_IP>:8086`) and configure InfluxDB for the first time. <br>
+   The InfluxDB configuration and database data are stored in the `influxdb` directory next to the `docker-compose.yml` file. For long-term operation, it is recommended to store the InfluxDB data on an external SSD. Frequent database write operations wear out the SD card of the Raspberry Pi more quickly.The Docker Compose configuration uses relative paths, allowing the data directory to be stored on an external drive without changing the volume definitions. The InfluxDB container is configured to restart automatically unless it is manually stopped.
+3. Access the InfluxDB web interface on the Raspberry Pi (`http://localhost:8086`) or any device in your network (`http://<Raspberry_Pi_IP>:8086`) and complete the initial InfluxDB setup. <br>
 You will need the InfluxDB URL, organization, bucket, and API token to configure the `data_bridge.py`.
-4. Now configure the `data_bridge.py` by adding the InfluxDB organization, bucket and API token created during the initial InfluxDB setup.
+4. To configure the `data_bridge.py` open the `config.env` file and add your InfluxDB API token, organization and bucket created during the initial InfluxDB setup.
 5. Set the baud rate to match the value used in the firmware and configure the serial port to which the ESP32-C3 receiver is connected. You can identify the available serial devices by running the following command and looking for the identifier of the receiver:
    ```bash
    ls -l /dev/serial/by-id/
    ```
-6. Navigate to the directory containing `data_bridge.py` and start the program with:
+6. Set up the Python virtual environment.
+   Install the required Python environment packages:
    ```bash
-   python3 data_bridge.py
+   sudo apt install python3-full python3-venv
    ```
-7. Verify the received data by logging in to the InfluxDB web interface and checking the configured bucket in the Data Explorer for new data points.
+
+   Navigate to the directory containing `data_bridge.py` and create a virtual environment:
+   ```bash
+   python3 -m venv .venv
+   ```
+
+   Activate the virtual environment:
+   ```bash
+   source .venv/bin/activate
+   ```
+7. Install the Python dependencies.
+   Navigate to the directory containing `data_bridge.py`.
+   While the virtual evrionment is still active install the required packages listed in `requirements.txt` with:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+8. Start the data bridge.
+   Start the Python application:
+   ```bash
+   python data_bridge.py
+   ```
+   Verify that sensor data is received and stored in the configured InfluxDB bucket. You can check for new data points using the Data Explorer in the InfluxDB web interface.
+   To stop the data bridge, press Ctrl + C.
+   To start the data bridge again, activate the virtual environment and run the application:
+   Verify the received data by logging in to the InfluxDB web interface and checking the configured bucket in the Data Explorer for new data points.
+   ```bash
+   source .venv/bin/activate
+   python data_bridge.py
+   ```
 
 ### Automatic Startup (optional but recommended)
 1. Copy the `data_bridge.service` file to the `/etc/systemd/system/` directory on the Raspberry Pi.

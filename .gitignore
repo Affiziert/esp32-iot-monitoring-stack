@@ -33,3 +33,7 @@ Desktop.ini
 
 # Local microcontroller configuration
 **/config_local.h
+
+# InfluxDB local data and configuration
+influxdb/data/
+influxdb/config/
