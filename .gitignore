@@ -28,6 +28,7 @@ Desktop.ini
 .env.*
 
 # Local configuration files
+**/data_bridge_local.service
 **/config_local.env
 
 # Local microcontroller configuration
