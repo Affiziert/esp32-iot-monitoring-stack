@@ -170,18 +170,24 @@ You will need the InfluxDB URL, organization, bucket, and API token to configure
    ```
 
 ### Automatic Startup (optional but recommended)
-1. Copy the `data_bridge.service` file to the `/etc/systemd/system/` directory on the Raspberry Pi.
+1. Download or copy the `data_bridge.service` to your Raspberry Pi.
 2. Open the service file and change the username and project directory according to your setup.
-3. Enable and start the service with:
+3. Copy the configured service file to the systemd directory:
    ```bash
+   sudo cp data_bridge.service /etc/systemd/system/data_bridge.service
+   ```
+4. Reload the systemd configuration and enable the service:
+   ```bash
+   sudo systemctl daemon-reload
    sudo systemctl enable --now data_bridge.service
    ```
-4. The Docker Compose stack is configured to restart automatically using the `restart: unless-stopped` option.
-5. After rebooting the Raspberry Pi, the Docker Compose stack and the data bridge should start automatically. You can check the status of the data bridge with:
+5. Verify that the data bridge is running:
    ```bash
    sudo systemctl status data_bridge.service
    ```
-   You are now ready to go!
+6. The Docker Compose stack is configured to restart automatically using the restart: unless-stopped option. The data bridge is started automatically by systemd.
+
+You are now ready to go!
    
 ---
    
