@@ -96,7 +96,7 @@ It is assumed that the following prerequisites are already fulfilled:
 
 The receiver must be configured and flashed before setting up the transmitter, as the transmitter requires the receiver's MAC address. If you do not know how to determine the MAC address, you can simply flash `ESP_MAC_Identifier.ino` to the receiver node. The MAC address will then be displayed via the serial monitor.
 
-1. Download the `ESP-NOW_RX.ino` and `config.h`file and open it with the Arduino IDE.
+1. Download the `ESP-NOW_RX.ino` and `config.h` file and open it with the Arduino IDE.
 2. Configure `wifi_channel` and `wifi_power` in the `config.h` file. Some boards may experience connection problems with transmission power above 15 dBm.
 3. Flash the firmware to the ESP32-C3 receiver.
 
@@ -135,8 +135,7 @@ You will need the InfluxDB URL, organization, bucket, and API token to configure
    ```bash
    ls -l /dev/serial/by-id/
    ```
-6. Set up the Python virtual environment.
-   Install the required Python environment packages:
+6. Set up the and install the required Python environment packages:
    ```bash
    sudo apt install python3-full python3-venv
    ```
@@ -150,22 +149,21 @@ You will need the InfluxDB URL, organization, bucket, and API token to configure
    ```bash
    source .venv/bin/activate
    ```
-7. Install the Python dependencies.
-   Navigate to the directory containing `data_bridge.py`.
-   While the virtual evrionment is still active install the required packages listed in `requirements.txt` with:
+7. Install the Python dependencies. Navigate to the directory containing `data_bridge.py`. While the virtual evrionment is still active install the required packages listed in `requirements.txt` with:
    ```bash
    pip install -r requirements.txt
    ```
 
-8. Start the data bridge.
-   Start the Python application:
+8. Start the data bridge with:
    ```bash
    python data_bridge.py
    ```
+
    Verify that sensor data is received and stored in the configured InfluxDB bucket. You can check for new data points using the Data Explorer in the InfluxDB web interface.
+
    To stop the data bridge, press Ctrl + C.
+
    To start the data bridge again, activate the virtual environment and run the application:
-   Verify the received data by logging in to the InfluxDB web interface and checking the configured bucket in the Data Explorer for new data points.
    ```bash
    source .venv/bin/activate
    python data_bridge.py
