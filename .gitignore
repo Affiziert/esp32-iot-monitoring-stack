@@ -31,6 +31,9 @@ Desktop.ini
 **/data_bridge_local.service
 **/config_local.env
 
+# Local docker-compose configuration
+**/docker-compose_local.yml
+
 # Local microcontroller configuration
 **/config_local.h
 
