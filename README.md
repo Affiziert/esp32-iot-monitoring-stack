@@ -297,7 +297,7 @@ A protocol version change is required if the structure or interpretation of the 
 
 - [ ] Sensor Node ID verification
 - [ ] Receiver logic for multiple transmissions per cycle
-- [ ] Grafana Dashboard
+- [ ] Grafana Dashboard/Readme update to set system rights for grafana mount
 - [ ] Protocol Version 2 for generic sensor integration
 - [ ] MQTT implementation between Receiver and Raspberry Pi
 
